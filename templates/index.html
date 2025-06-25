@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta name="description" content="Мониторинг логов" />
+    <title>Мониторинг логов</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Roboto, Arial, sans-serif;
+        background: #1e1e2f;
+        color: #eee;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 20px;
+        background: #2c2c3c;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      }
+
+      h1 {
+        color: #f0f0f0;
+        font-size: 2.2em;
+        margin-bottom: 30px;
+        text-align: center;
+        letter-spacing: 1px;
+      }
+
+      img {
+        width: 80%;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(255, 0, 0, 0.25);
+        margin-bottom: 30px;
+        transition: transform 0.3s ease;
+        cursor: pointer;
+      }
+
+      img:hover {
+        transform: scale(1.01);
+      }
+
+      .error {
+        color: #ff6b6b;
+        font-size: 18px;
+        background-color: #3a1e1e;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #ff4d4d;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        background: #262637;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      th,
+      td {
+        padding: 14px 16px;
+        text-align: left;
+      }
+
+      th {
+        background-color: #3a3a4d;
+        color: #fff;
+        text-transform: uppercase;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+      }
+
+      td {
+        border-bottom: 1px solid #444;
+        color: #ddd;
+        font-size: 15px;
+        word-break: break-word;
+      }
+
+      tr:nth-child(even) {
+        background-color: #2a2a3a;
+      }
+
+      .table-container {
+        margin-top: 30px;
+        border-radius: 10px;
+        padding: 10px;
+        background: #2c2c3c;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          margin: 20px;
+          padding: 15px;
+        }
+
+        h1 {
+          font-size: 1.6em;
+        }
+
+        table,
+        th,
+        td {
+          font-size: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Мониторинг логов бэкенда</h1>
+      {% if error %}
+      <p class="error">{{ error }}</p>
+      {% else %}
+      <img src="/static/event_type_chart.png" alt="График событий" />
+      {% if table_data %}
+      <table>
+        <tr>
+          <th>Время</th>
+          <th>Тип события</th>
+          <th>Сообщение</th>
+        </tr>
+        {% for row in table_data %}
+        <tr>
+          <td>{{ row.timestamp.strftime('%Y/%m/%d %H:%M:%S') }}</td>
+          <td>{{ row.event_type }}</td>
+          <td>{{ row.message }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% endif %} {% endif %}
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      function fetchData() {
+        $.getJSON("/data", function (data) {
+          if (data.error) {
+            $("#table-container").html(
+              '<p class="error">' + data.error + "</p>"
+            );
+          } else {
+            let rows = "";
+            data.table.forEach((row) => {
+              rows += `
+                        <tr>
+                            <td>${row.timestamp}</td>
+                            <td>${row.event_type}</td>
+                            <td>${row.message}</td>
+                        </tr>
+                    `;
+            });
+            $("#table-body").html(rows);
+          }
+        });
+
+        const timestamp = new Date().getTime();
+        $("#graph").attr("src", "/image?t=" + timestamp);
+      }
+
+      setInterval(fetchData, 5000);
+      $(document).ready(fetchData);
+    </script>
+  </body>
+</html>
