@@ -16,7 +16,7 @@ logging.basicConfig(
     level=logging.ERROR,
     format='%(asctime)s - %(levelname)s - %(message)s' 
 )
-LOG_FILE_PATH = r'C:\Users\pavlo\Downloads\Free6\all_logs\server_errors.log'
+LOG_FILE_PATH = r'You log path'
 
 import re
 
